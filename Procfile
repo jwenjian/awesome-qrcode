@@ -1,1 +1,1 @@
-web: gunicorn aweome_qrcode:app --log-file=-
+web: gunicorn awesome_qrcode:app --log-file=-
