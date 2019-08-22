@@ -1,3 +1,5 @@
 Flask
-MyQR
 gunicorn
+pillow
+numpy
+imageio

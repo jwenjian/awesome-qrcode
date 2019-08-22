@@ -6,11 +6,28 @@ from os.path import isfile
 from MyQR import myqr
 
 
+def utf16to8(input_txt: str) -> str:
+    out = []
+    for idx in range(len(input_txt)):
+        ch = ord(input_txt[idx])
+        if 0x0001 <= ch <= 0x007f:
+            out.append(input_txt[idx])
+        elif ch > 0x07ff:
+            out.append(chr(0xE0 | (ch >> 12 & 0x0F)))
+            out.append(chr(0x80 | (ch >> 6 & 0x3F)))
+            out.append(chr(0x80 | (ch >> 0 & 0x3F)))
+        else:
+            out.append(chr(0xC0 | (ch >> 6) & 0x1f))
+            out.append(chr(0x80 | (ch >> 0) & 0x3f))
+
+    return ''.join(out)
+
+
 class Generator(object):
     @staticmethod
     def gen_normal_qrcode(text: str) -> str:
         target_filename = Generator._get_rnd_png_filename()
-        version, level, qr_name = myqr.run(text, save_name=target_filename)
+        version, level, qr_name = myqr.run(utf16to8(text), save_name=target_filename)
         result_str = None
         file = None
         try:
@@ -30,7 +47,7 @@ class Generator(object):
     @staticmethod
     def gen_picture_qrcode(text: str, pic_file_path, colorized=True) -> str:
         target_filename = Generator._get_rnd_png_filename()
-        version, level, qr_name = myqr.run(text, picture=pic_file_path, colorized=colorized, save_name=target_filename)
+        version, level, qr_name = myqr.run(utf16to8(text), picture=pic_file_path, colorized=colorized, save_name=target_filename)
         result_str = None
         file = None
         try:
@@ -57,7 +74,7 @@ class Generator(object):
         file = None
 
         try:
-            version, level, qr_name = myqr.run(text, picture=pic_file_path, colorized=colorized,
+            version, level, qr_name = myqr.run(utf16to8(text), picture=pic_file_path, colorized=colorized,
                                                save_name=target_filename)
             file = open(qr_name, 'rb')
             result_str = base64.b64encode(file.read())
